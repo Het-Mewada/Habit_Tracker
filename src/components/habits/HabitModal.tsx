@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Check, Clock } from 'lucide-react';
 import { HabitItem } from '../dashboard/HabitCard';
 import { AVAILABLE_ICONS, getHabitIcon } from '@/lib/icon-map';
+import { Portal } from '@/components/ui/Portal';
 
 interface HabitModalProps {
   isOpen: boolean;
@@ -24,13 +25,13 @@ interface HabitModalProps {
 
 const PRESET_COLORS = [
   '#4a5d4e', // Muted Sage
-  '#785e3a', // Muted Sand
-  '#3b82f6', // Soft Blue
-  '#64748b', // Slate
-  '#71717a', // Zinc
+  '#6b5b45', // Muted Terracotta/Sand
+  '#3b82f6', // Muted Slate Blue
+  '#475569', // Muted Charcoal
+  '#64748b', // Cool Slate
 ];
 
-const PRESET_CATEGORIES = ['Health & Body', 'Mind & Focus', 'Growth & Study', 'Daily Rituals', 'Productivity', 'Finance', 'General'];
+const PRESET_CATEGORIES = ['General', 'Health & Body', 'Growth & Study', 'Work & Career', 'Mindset & Rest'];
 
 export const HabitModal: React.FC<HabitModalProps> = ({
   isOpen,
@@ -114,17 +115,18 @@ export const HabitModal: React.FC<HabitModalProps> = ({
   const isMidnightCrossing = isTimeSpecific && startTime && endTime && (endTime < startTime || endTime === startTime);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm overflow-y-auto">
-      <div className="w-full max-w-md p-5 my-8 bg-white dark:bg-[#15181E] rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-              <IconComponent className="w-4 h-4 stroke-[1.5]" />
+    <Portal>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm overflow-y-auto">
+        <div className="w-full max-w-md p-5 my-8 bg-white dark:bg-[#15181E] rounded-xl shadow-lg border border-slate-200 dark:border-slate-800 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                <IconComponent className="w-4 h-4 stroke-[1.5]" />
+              </div>
+              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                {initialHabit ? 'Edit Habit' : 'Create Habit'}
+              </h2>
             </div>
-            <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              {initialHabit ? 'Edit Habit' : 'Create Habit'}
-            </h2>
-          </div>
           <button
             onClick={onClose}
             className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded"
@@ -330,5 +332,6 @@ export const HabitModal: React.FC<HabitModalProps> = ({
         </form>
       </div>
     </div>
+    </Portal>
   );
 };

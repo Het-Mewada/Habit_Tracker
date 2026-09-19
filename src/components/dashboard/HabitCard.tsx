@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Check, Flame, MessageSquare, Edit3, Trash2, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { HabitIconView } from '@/lib/icon-map';
+import { Portal } from '@/components/ui/Portal';
 
 export interface HabitItem {
   id: string;
@@ -222,36 +223,38 @@ export const HabitCard: React.FC<HabitCardProps> = ({
 
       {/* Note Modal */}
       {showNoteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
-          <div className="w-full max-w-sm p-5 bg-white dark:bg-[#15181E] rounded-xl shadow-md border border-slate-200 dark:border-slate-800 space-y-3">
-            <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-              <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
-              Notes for {habit.name}
-            </h3>
-            <textarea
-              value={noteText}
-              onChange={(e) => setNoteText(e.target.value)}
-              placeholder="Reflection notes..."
-              rows={3}
-              className="w-full p-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0E1013] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-slate-400 font-sans"
-            />
-            <div className="flex items-center justify-end gap-2">
-              <button
-                onClick={() => setShowNoteModal(false)}
-                className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveNote}
-                disabled={isSubmittingNote}
-                className="px-3 py-1.5 text-xs font-semibold text-white bg-slate-900 dark:bg-slate-100 dark:text-slate-900 rounded-lg disabled:opacity-50"
-              >
-                {isSubmittingNote ? 'Saving...' : 'Save'}
-              </button>
+        <Portal>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm">
+            <div className="w-full max-w-sm p-5 bg-white dark:bg-[#15181E] rounded-xl shadow-md border border-slate-200 dark:border-slate-800 space-y-3">
+              <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
+                Notes for {habit.name}
+              </h3>
+              <textarea
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                placeholder="Reflection notes..."
+                rows={3}
+                className="w-full p-2.5 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0E1013] text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-slate-400 font-sans"
+              />
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  onClick={() => setShowNoteModal(false)}
+                  className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveNote}
+                  disabled={isSubmittingNote}
+                  className="px-3 py-1.5 text-xs font-semibold text-white bg-slate-900 dark:bg-slate-100 dark:text-slate-900 rounded-lg disabled:opacity-50"
+                >
+                  {isSubmittingNote ? 'Saving...' : 'Save'}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );
