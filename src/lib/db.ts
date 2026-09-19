@@ -79,18 +79,6 @@ const INIT_SCHEMA_SQL = [
   `CREATE INDEX IF NOT EXISTS "HabitEvent_userId_idx" ON "HabitEvent"("userId");`,
 ];
 
-function ensureTablesExist(client: PrismaClient) {
-  Promise.resolve().then(async () => {
-    for (const sql of INIT_SCHEMA_SQL) {
-      try {
-        await client.$executeRawUnsafe(sql);
-      } catch (err) {
-        // Ignore table creation errors if already existing
-      }
-    }
-  });
-}
-
 function createPrismaClient(): PrismaClient {
   let client: PrismaClient;
 
@@ -131,7 +119,27 @@ function createPrismaClient(): PrismaClient {
     });
   }
 
-  ensureTablesExist(client);
+  let initialized = false;
+  let initPromise: Promise<void> | null = null;
+
+  client.$use(async (params, next) => {
+    if (!initialized) {
+      if (!initPromise) {
+        initPromise = (async () => {
+          for (const sql of INIT_SCHEMA_SQL) {
+            try {
+              await client.$executeRawUnsafe(sql);
+            } catch (err) {
+              // Ignore if table/index exists
+            }
+          }
+          initialized = true;
+        })();
+      }
+      await initPromise;
+    }
+    return next(params);
+  });
 
   return client;
 }

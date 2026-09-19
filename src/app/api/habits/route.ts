@@ -121,6 +121,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ habit: newHabit }, { status: 201 });
   } catch (err: unknown) {
     console.error('Create habit error:', err);
-    return NextResponse.json({ error: 'Failed to create habit' }, { status: 500 });
+    const message = err instanceof Error ? err.message : 'Failed to create habit';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
