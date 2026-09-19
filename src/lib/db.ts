@@ -80,8 +80,6 @@ const INIT_SCHEMA_SQL = [
 ];
 
 function createPrismaClient(): PrismaClient {
-  let client: PrismaClient;
-
   if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
     const tmpDbPath = '/tmp/dev.db';
     if (!fs.existsSync(tmpDbPath)) {
@@ -106,44 +104,73 @@ function createPrismaClient(): PrismaClient {
       }
     }
 
-    client = new PrismaClient({
+    return new PrismaClient({
       datasources: {
         db: {
           url: `file:${tmpDbPath}`,
         },
       },
     });
-  } else {
-    client = new PrismaClient({
-      log: ['error'],
-    });
   }
 
-  let initialized = false;
-  let initPromise: Promise<void> | null = null;
-
-  client.$use(async (params, next) => {
-    if (!initialized) {
-      if (!initPromise) {
-        initPromise = (async () => {
-          for (const sql of INIT_SCHEMA_SQL) {
-            try {
-              await client.$executeRawUnsafe(sql);
-            } catch (err) {
-              // Ignore if table/index exists
-            }
-          }
-          initialized = true;
-        })();
-      }
-      await initPromise;
-    }
-    return next(params);
+  return new PrismaClient({
+    log: ['error'],
   });
-
-  return client;
 }
 
-export const db = globalForPrisma.prisma ?? createPrismaClient();
+const rawPrisma = globalForPrisma.prisma ?? createPrismaClient();
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = rawPrisma;
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db;
+let schemaInitialized = false;
+let schemaInitPromise: Promise<void> | null = null;
+
+async function ensureSchemaInitialized(client: PrismaClient) {
+  if (schemaInitialized) return;
+  if (!schemaInitPromise) {
+    schemaInitPromise = (async () => {
+      for (const sql of INIT_SCHEMA_SQL) {
+        try {
+          await client.$executeRawUnsafe(sql);
+        } catch (err) {
+          // Table or index already exists
+        }
+      }
+      schemaInitialized = true;
+    })();
+  }
+  await schemaInitPromise;
+}
+
+export const db: PrismaClient = new Proxy(rawPrisma, {
+  get(target, prop, receiver) {
+    const value = Reflect.get(target, prop, receiver);
+
+    // Trap model delegates e.g. db.user, db.habit, db.habitLog, db.habitEvent
+    if (typeof prop === 'string' && !prop.startsWith('$') && typeof value === 'object' && value !== null) {
+      return new Proxy(value, {
+        get(modelTarget, modelProp, modelReceiver) {
+          const modelValue = Reflect.get(modelTarget, modelProp, modelReceiver);
+          if (typeof modelValue === 'function') {
+            return async function (...args: any[]) {
+              await ensureSchemaInitialized(target);
+              return modelValue.apply(modelTarget, args);
+            };
+          }
+          return modelValue;
+        },
+      });
+    }
+
+    // Trap top-level PrismaClient methods e.g. db.$queryRaw
+    if (typeof value === 'function') {
+      return async function (...args: any[]) {
+        if (prop !== '$executeRawUnsafe' && prop !== '$queryRawUnsafe') {
+          await ensureSchemaInitialized(target);
+        }
+        return value.apply(target, args);
+      };
+    }
+
+    return value;
+  },
+});
