@@ -22,7 +22,7 @@ export async function GET(req: Request) {
     if (date) {
       // Return details for a single date
       const allActiveHabits = await db.habit.findMany({
-        where: { userId: session.userId, isArchived: false },
+        where: { userId: user.id, isArchived: false },
         orderBy: { createdAt: 'asc' },
       });
 
@@ -33,13 +33,13 @@ export async function GET(req: Request) {
 
       // Fetch lifecycle events recorded for this date
       const dbEvents = await db.habitEvent.findMany({
-        where: { userId: session.userId, date },
+        where: { userId: user.id, date },
         orderBy: { createdAt: 'asc' },
       });
 
       // Fallback for legacy habits created before HabitEvent tracking
       const allUserHabits = await db.habit.findMany({
-        where: { userId: session.userId },
+        where: { userId: user.id },
         orderBy: { createdAt: 'asc' },
       });
 
@@ -73,7 +73,7 @@ export async function GET(req: Request) {
 
       const logs = await db.habitLog.findMany({
         where: {
-          userId: session.userId,
+          userId: user.id,
           date,
         },
       });
@@ -111,7 +111,7 @@ export async function GET(req: Request) {
     // Range query (e.g. for month calendar view)
     const logs = await db.habitLog.findMany({
       where: {
-        userId: session.userId,
+        userId: user.id,
         ...(startDate || endDate
           ? {
               date: {

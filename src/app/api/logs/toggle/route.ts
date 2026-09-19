@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, ensureUserInDb } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { getTodayDateString, getTaskTimeWindow, DEFAULT_TIMEZONE } from '@/lib/date-utils';
 
@@ -16,17 +16,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'habitId is required' }, { status: 400 });
     }
 
-    const user = await db.user.findUnique({
-      where: { id: session.userId },
-      select: { timezone: true },
-    });
-
-    const userTimezone = user?.timezone || DEFAULT_TIMEZONE;
+    const user = await ensureUserInDb(session);
+    const userTimezone = user.timezone || DEFAULT_TIMEZONE;
     const targetDate = date || getTodayDateString(userTimezone);
 
     // Verify habit ownership
     const habit = await db.habit.findUnique({ where: { id: habitId } });
-    if (!habit || habit.userId !== session.userId) {
+    if (!habit || habit.userId !== user.id) {
       return NextResponse.json({ error: 'Habit not found' }, { status: 404 });
     }
 
@@ -91,7 +87,7 @@ export async function POST(req: Request) {
       },
       create: {
         habitId,
-        userId: session.userId,
+        userId: user.id,
         date: targetDate,
         completed: Boolean(newCompleted),
         completedAt: newCompleted ? new Date() : null,

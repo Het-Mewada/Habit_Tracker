@@ -88,7 +88,7 @@ export async function POST(req: Request) {
 
     const newHabit = await db.habit.create({
       data: {
-        userId: session.userId,
+        userId: user.id,
         name: name.trim(),
         description: description?.trim() || null,
         icon: icon || '⚡',
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
 
     await db.habitEvent.create({
       data: {
-        userId: session.userId,
+        userId: user.id,
         habitId: newHabit.id,
         habitName: newHabit.name,
         icon: newHabit.icon,

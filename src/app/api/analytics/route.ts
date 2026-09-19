@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, ensureUserInDb } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { getTodayDateString, getPastDatesList, getFormattedDateLabel, formatDateToYYYYMMDD } from '@/lib/date-utils';
 import { calculateHabitStreaks } from '@/lib/streaks';
@@ -14,17 +14,13 @@ export async function GET(req: Request) {
   const periodParam = searchParams.get('period') || '30'; // '7', '30', '90', 'all'
   const days = periodParam === '7' ? 7 : periodParam === '90' ? 90 : periodParam === 'all' ? 180 : 30;
 
-  const user = await db.user.findUnique({
-    where: { id: session.userId },
-    select: { timezone: true },
-  });
-
-  const userTimezone = user?.timezone || 'UTC';
+  const user = await ensureUserInDb(session);
+  const userTimezone = user.timezone || 'UTC';
   const todayStr = getTodayDateString(userTimezone);
 
   // 1. Fetch active habits
   const activeHabits = await db.habit.findMany({
-    where: { userId: session.userId, isArchived: false },
+    where: { userId: user.id, isArchived: false },
     orderBy: { createdAt: 'asc' },
   });
 
@@ -39,7 +35,7 @@ export async function GET(req: Request) {
   // Fetch all completed logs for the user
   const allLogs = await db.habitLog.findMany({
     where: {
-      userId: session.userId,
+      userId: user.id,
       completed: true,
     },
   });
