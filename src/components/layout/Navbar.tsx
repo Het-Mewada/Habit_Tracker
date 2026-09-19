@@ -33,7 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({ userName = 'User', onToggleSideb
   };
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-4 md:px-6 bg-white dark:bg-[#15181E] border-b border-slate-200/80 dark:border-slate-800/80 shadow-2xs">
+    <header className="shrink-0 z-30 relative flex items-center justify-between h-16 px-4 md:px-6 bg-white dark:bg-[#15181E] border-b border-slate-200/80 dark:border-slate-800/80 shadow-2xs">
       <div className="flex items-center gap-3">
         {onToggleSidebar && (
           <button
