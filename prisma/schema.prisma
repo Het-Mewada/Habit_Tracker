@@ -21,6 +21,7 @@ model User {
   habits             Habit[]
   logs               HabitLog[]
   aiInsights         AiInsight[]
+  events             HabitEvent[]
 }
 
 model Habit {
@@ -70,5 +71,21 @@ model AiInsight {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  @@index([userId])
+}
+
+model HabitEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habitId   String?
+  habitName String
+  icon      String   @default("code")
+  category  String   @default("General")
+  eventType String   // "CREATED" | "DELETED" | "ARCHIVED" | "RESTORED"
+  date      String   // Format: YYYY-MM-DD
+  createdAt DateTime @default(now())
+
+  @@index([userId, date])
   @@index([userId])
 }

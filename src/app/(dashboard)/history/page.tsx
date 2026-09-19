@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { CalendarView } from '@/components/history/CalendarView';
 import { getTodayDateString, getFormattedDateLabel } from '@/lib/date-utils';
-import { Check, X, MessageSquare, Sparkles } from 'lucide-react';
+import { Check, X, MessageSquare, Sparkles, Trash2, Archive } from 'lucide-react';
 import { clsx } from 'clsx';
 import { HabitIconView } from '@/lib/icon-map';
 
@@ -13,6 +13,16 @@ interface CreatedHabit {
   icon: string;
   color: string;
   category: string;
+}
+
+interface HabitEventItem {
+  id: string;
+  habitId: string | null;
+  habitName: string;
+  icon: string;
+  category: string;
+  eventType: 'CREATED' | 'DELETED' | 'ARCHIVED' | 'RESTORED';
+  date: string;
 }
 
 interface DayHabitStatus {
@@ -35,6 +45,7 @@ export default function HistoryPage() {
     isToday: boolean;
     habits: DayHabitStatus[];
     createdHabitsOnDate?: CreatedHabit[];
+    eventsOnDate?: HabitEventItem[];
   } | null>(null);
 
   const [logsByDate, setLogsByDate] = useState<Record<string, number>>({});
@@ -130,8 +141,61 @@ export default function HistoryPage() {
               </div>
             </div>
 
-            {/* Created Habits Banner for selected date */}
-            {dayDetails?.createdHabitsOnDate && dayDetails.createdHabitsOnDate.length > 0 && (
+            {/* Habit Lifecycle Events Banner for selected date */}
+            {dayDetails?.eventsOnDate && dayDetails.eventsOnDate.length > 0 ? (
+              <div className="space-y-1.5 text-xs">
+                {dayDetails.eventsOnDate.map((evt) => {
+                  const isCreated = evt.eventType === 'CREATED' || evt.eventType === 'RESTORED';
+                  const isDeleted = evt.eventType === 'DELETED';
+
+                  return (
+                    <div
+                      key={evt.id}
+                      className={clsx(
+                        'p-2.5 rounded-lg border flex items-center gap-2 font-medium',
+                        isCreated
+                          ? 'bg-sage-50/80 dark:bg-sage-950/30 border-sage-200/60 dark:border-sage-900/40 text-sage-800 dark:text-sage-300'
+                          : isDeleted
+                          ? 'bg-rose-50/80 dark:bg-rose-950/30 border-rose-200/60 dark:border-rose-900/40 text-rose-800 dark:text-rose-300'
+                          : 'bg-amber-50/80 dark:bg-amber-950/30 border-amber-200/60 dark:border-amber-900/40 text-amber-800 dark:text-amber-300'
+                      )}
+                    >
+                      {isCreated ? (
+                        <Sparkles className="w-3.5 h-3.5 text-sage-600 dark:text-sage-400 shrink-0" />
+                      ) : isDeleted ? (
+                        <Trash2 className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
+                      ) : (
+                        <Archive className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                      )}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span>
+                          {evt.eventType === 'CREATED'
+                            ? 'Habit created on this day:'
+                            : evt.eventType === 'DELETED'
+                            ? 'Habit deleted on this day:'
+                            : evt.eventType === 'ARCHIVED'
+                            ? 'Habit archived on this day:'
+                            : 'Habit restored on this day:'}
+                        </span>
+                        <span
+                          className={clsx(
+                            'font-semibold inline-flex items-center gap-1 px-2 py-0.5 rounded',
+                            isCreated
+                              ? 'bg-sage-100 dark:bg-sage-900/60 text-sage-900 dark:text-sage-200'
+                              : isDeleted
+                              ? 'bg-rose-100 dark:bg-rose-900/60 text-rose-900 dark:text-rose-200'
+                              : 'bg-amber-100 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200'
+                          )}
+                        >
+                          <HabitIconView iconKey={evt.icon} className="w-3.5 h-3.5" />
+                          {evt.habitName}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : dayDetails?.createdHabitsOnDate && dayDetails.createdHabitsOnDate.length > 0 ? (
               <div className="p-3 bg-sage-50/80 dark:bg-sage-950/30 border border-sage-200/60 dark:border-sage-900/40 rounded-lg space-y-1.5 text-xs">
                 {dayDetails.createdHabitsOnDate.map((h) => (
                   <div key={h.id} className="flex items-center gap-2 text-sage-800 dark:text-sage-300 font-medium">
@@ -146,7 +210,7 @@ export default function HistoryPage() {
                   </div>
                 ))}
               </div>
-            )}
+            ) : null}
 
             {loading ? (
               <div className="p-6 text-center text-xs font-mono text-slate-400 animate-pulse">

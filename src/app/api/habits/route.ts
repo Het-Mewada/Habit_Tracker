@@ -85,6 +85,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Habit name is required' }, { status: 400 });
     }
 
+    const user = await db.user.findUnique({
+      where: { id: session.userId },
+      select: { timezone: true },
+    });
+    const userTimezone = user?.timezone || DEFAULT_TIMEZONE;
+    const todayStr = getTodayDateString(userTimezone);
+
     const newHabit = await db.habit.create({
       data: {
         userId: session.userId,
@@ -96,6 +103,18 @@ export async function POST(req: Request) {
         isTimeSpecific: Boolean(isTimeSpecific),
         startTime: isTimeSpecific && startTime ? startTime : null,
         endTime: isTimeSpecific && endTime ? endTime : null,
+      },
+    });
+
+    await db.habitEvent.create({
+      data: {
+        userId: session.userId,
+        habitId: newHabit.id,
+        habitName: newHabit.name,
+        icon: newHabit.icon,
+        category: newHabit.category,
+        eventType: 'CREATED',
+        date: todayStr,
       },
     });
 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { hashPassword, createSessionToken, COOKIE_NAME } from '@/lib/auth';
+import { getTodayDateString } from '@/lib/date-utils';
 
 export async function POST(req: Request) {
   try {
@@ -28,6 +29,8 @@ export async function POST(req: Request) {
       },
     });
 
+    const todayStr = getTodayDateString(user.timezone || 'UTC');
+
     // Seed default sample habits with vector keys and muted architectural colors
     const defaultHabits = [
       { name: 'Code for 1 hour', icon: 'code', color: '#4a5d4e', category: 'Growth & Study' },
@@ -37,13 +40,25 @@ export async function POST(req: Request) {
     ];
 
     for (const h of defaultHabits) {
-      await db.habit.create({
+      const createdHabit = await db.habit.create({
         data: {
           userId: user.id,
           name: h.name,
           icon: h.icon,
           color: h.color,
           category: h.category,
+        },
+      });
+
+      await db.habitEvent.create({
+        data: {
+          userId: user.id,
+          habitId: createdHabit.id,
+          habitName: createdHabit.name,
+          icon: createdHabit.icon,
+          category: createdHabit.category,
+          eventType: 'CREATED',
+          date: todayStr,
         },
       });
     }

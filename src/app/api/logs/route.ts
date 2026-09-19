@@ -30,21 +30,50 @@ export async function GET(req: Request) {
         orderBy: { createdAt: 'asc' },
       });
 
-      // Filter habits created on or before this date
+      // Filter active habits created on or before this date
       const habitsOnDate = allActiveHabits.filter(
         (h) => formatDateToYYYYMMDD(h.createdAt, userTimezone) <= date
       );
 
-      // Habits created on this exact date
-      const createdHabitsOnDate = allActiveHabits
-        .filter((h) => formatDateToYYYYMMDD(h.createdAt, userTimezone) === date)
-        .map((h) => ({
-          id: h.id,
-          name: h.name,
-          icon: h.icon,
-          color: h.color,
-          category: h.category,
-        }));
+      // Fetch lifecycle events recorded for this date
+      const dbEvents = await db.habitEvent.findMany({
+        where: { userId: session.userId, date },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      // Fallback for legacy habits created before HabitEvent tracking
+      const allUserHabits = await db.habit.findMany({
+        where: { userId: session.userId },
+        orderBy: { createdAt: 'asc' },
+      });
+
+      const eventsOnDate = dbEvents.map((e) => ({
+        id: e.id,
+        habitId: e.habitId,
+        habitName: e.habitName,
+        icon: e.icon,
+        category: e.category,
+        eventType: e.eventType,
+        date: e.date,
+      }));
+
+      const existingCreatedHabitIds = new Set(
+        dbEvents.filter((e) => e.eventType === 'CREATED').map((e) => e.habitId)
+      );
+
+      allUserHabits.forEach((h) => {
+        if (formatDateToYYYYMMDD(h.createdAt, userTimezone) === date && !existingCreatedHabitIds.has(h.id)) {
+          eventsOnDate.push({
+            id: `legacy-${h.id}`,
+            habitId: h.id,
+            habitName: h.name,
+            icon: h.icon,
+            category: h.category,
+            eventType: 'CREATED',
+            date,
+          });
+        }
+      });
 
       const logs = await db.habitLog.findMany({
         where: {
@@ -65,10 +94,20 @@ export async function GET(req: Request) {
         };
       });
 
+      const createdHabitsOnDate = eventsOnDate
+        .filter((e) => e.eventType === 'CREATED')
+        .map((e) => ({
+          id: e.habitId || e.id,
+          name: e.habitName,
+          icon: e.icon,
+          category: e.category,
+        }));
+
       return NextResponse.json({
         date,
         isToday: date === todayStr,
         habits: habitStatuses,
+        eventsOnDate,
         createdHabitsOnDate,
       });
     }
