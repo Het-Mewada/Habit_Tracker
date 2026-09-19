@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f7f7f5;
+  --foreground: #18181b;
+}
+
+.dark {
+  --background: #0e1013;
+  --foreground: #f4f4f5;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  min-height: 100vh;
+}
+
+/* Tabular Numbers */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom Heatmap Muted Intensity Tiers */
+.heatmap-tier-0 {
+  background-color: #e2e2df;
+}
+.dark .heatmap-tier-0 {
+  background-color: #1c2028;
+}
+
+.heatmap-tier-1 {
+  background-color: #c8d1c9;
+}
+.dark .heatmap-tier-1 {
+  background-color: #2a342c;
+}
+
+.heatmap-tier-2 {
+  background-color: #9cb09f;
+}
+.dark .heatmap-tier-2 {
+  background-color: #3a4b3d;
+}
+
+.heatmap-tier-3 {
+  background-color: #718e75;
+}
+.dark .heatmap-tier-3 {
+  background-color: #4c6450;
+}
+
+.heatmap-tier-4 {
+  background-color: #516f56;
+}
+.dark .heatmap-tier-4 {
+  background-color: #638167;
+}
+
+.heatmap-tier-5 {
+  background-color: #39523e;
+}
+.dark .heatmap-tier-5 {
+  background-color: #7e9d82;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #27272a;
+}

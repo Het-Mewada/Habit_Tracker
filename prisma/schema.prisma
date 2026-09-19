@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id                 String      @id @default(cuid())
+  email              String      @unique
+  passwordHash       String
+  name               String
+  timezone           String      @default("UTC")
+  groqApiKey         String?
+  geminiApiKey       String?
+  requireMin7DaysAi  Boolean     @default(true)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  habits             Habit[]
+  logs               HabitLog[]
+  aiInsights         AiInsight[]
+}
+
+model Habit {
+  id                String     @id @default(cuid())
+  userId            String
+  user              User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name              String
+  description       String?
+  icon              String     @default("⚡")
+  color             String     @default("#3b82f6")
+  category          String     @default("General")
+  isArchived        Boolean    @default(false)
+  isTimeSpecific    Boolean    @default(false)
+  startTime         String?    // Format: HH:mm (e.g. "18:00")
+  endTime           String?    // Format: HH:mm (e.g. "19:00" or "01:00")
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  logs              HabitLog[]
+
+  @@index([userId])
+}
+
+model HabitLog {
+  id          String    @id @default(cuid())
+  habitId     String
+  habit       Habit     @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        String    // Format: YYYY-MM-DD
+  completed   Boolean   @default(true)
+  completedAt DateTime?
+  notes       String?
+
+  @@unique([habitId, date])
+  @@index([userId, date])
+  @@index([userId])
+}
+
+model AiInsight {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  period         String   @default("last_30_days")
+  provider       String   @default("heuristic")
+  summaryPayload String   // JSON stringified summary
+  insightContent String   // JSON stringified insight result
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+}
