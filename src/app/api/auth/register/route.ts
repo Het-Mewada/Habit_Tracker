@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { hashPassword, createSessionToken, COOKIE_NAME } from '@/lib/auth';
-import { getTodayDateString } from '@/lib/date-utils';
 
 export async function POST(req: Request) {
   try {
@@ -29,39 +28,7 @@ export async function POST(req: Request) {
       },
     });
 
-    const todayStr = getTodayDateString(user.timezone || 'UTC');
 
-    // Seed default sample habits with vector keys and muted architectural colors
-    const defaultHabits = [
-      { name: 'Code for 1 hour', icon: 'code', color: '#4a5d4e', category: 'Growth & Study' },
-      { name: 'Study Core CS', icon: 'book', color: '#4a5d4e', category: 'Growth & Study' },
-      { name: 'Workout / Exercise', icon: 'workout', color: '#4a5d4e', category: 'Health & Body' },
-      { name: 'Daily Hydration', icon: 'water', color: '#4a5d4e', category: 'Health & Body' },
-    ];
-
-    for (const h of defaultHabits) {
-      const createdHabit = await db.habit.create({
-        data: {
-          userId: user.id,
-          name: h.name,
-          icon: h.icon,
-          color: h.color,
-          category: h.category,
-        },
-      });
-
-      await db.habitEvent.create({
-        data: {
-          userId: user.id,
-          habitId: createdHabit.id,
-          habitName: createdHabit.name,
-          icon: createdHabit.icon,
-          category: createdHabit.category,
-          eventType: 'CREATED',
-          date: todayStr,
-        },
-      });
-    }
 
     const token = await createSessionToken({
       userId: user.id,
