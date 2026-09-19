@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, ensureUserInDb } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { getTodayDateString, formatDateToYYYYMMDD } from '@/lib/date-utils';
 
@@ -14,12 +14,8 @@ export async function GET(req: Request) {
   const startDate = searchParams.get('startDate');
   const endDate = searchParams.get('endDate');
 
-  const user = await db.user.findUnique({
-    where: { id: session.userId },
-    select: { timezone: true },
-  });
-
-  const userTimezone = user?.timezone || 'UTC';
+  const user = await ensureUserInDb(session);
+  const userTimezone = user.timezone || 'UTC';
   const todayStr = getTodayDateString(userTimezone);
 
   try {

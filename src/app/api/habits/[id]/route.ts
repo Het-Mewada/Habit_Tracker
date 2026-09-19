@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, ensureUserInDb } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { getTodayDateString, DEFAULT_TIMEZONE } from '@/lib/date-utils';
 
@@ -12,8 +12,9 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   const { id } = params;
 
   try {
+    const user = await ensureUserInDb(session);
     const existingHabit = await db.habit.findUnique({ where: { id } });
-    if (!existingHabit || existingHabit.userId !== session.userId) {
+    if (!existingHabit || existingHabit.userId !== user.id) {
       return NextResponse.json({ error: 'Habit not found' }, { status: 404 });
     }
 
@@ -36,16 +37,12 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     });
 
     if (isArchived !== undefined && Boolean(isArchived) !== existingHabit.isArchived) {
-      const user = await db.user.findUnique({
-        where: { id: session.userId },
-        select: { timezone: true },
-      });
-      const userTimezone = user?.timezone || DEFAULT_TIMEZONE;
+      const userTimezone = user.timezone || DEFAULT_TIMEZONE;
       const todayStr = getTodayDateString(userTimezone);
 
       await db.habitEvent.create({
         data: {
-          userId: session.userId,
+          userId: user.id,
           habitId: updated.id,
           habitName: updated.name,
           icon: updated.icon,
@@ -72,22 +69,19 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   const { id } = params;
 
   try {
+    const user = await ensureUserInDb(session);
     const existingHabit = await db.habit.findUnique({ where: { id } });
-    if (!existingHabit || existingHabit.userId !== session.userId) {
+    if (!existingHabit || existingHabit.userId !== user.id) {
       return NextResponse.json({ error: 'Habit not found' }, { status: 404 });
     }
 
-    const user = await db.user.findUnique({
-      where: { id: session.userId },
-      select: { timezone: true },
-    });
-    const userTimezone = user?.timezone || DEFAULT_TIMEZONE;
+    const userTimezone = user.timezone || DEFAULT_TIMEZONE;
     const todayStr = getTodayDateString(userTimezone);
 
     // Record DELETED event before removing the habit record
     await db.habitEvent.create({
       data: {
-        userId: session.userId,
+        userId: user.id,
         habitId: existingHabit.id,
         habitName: existingHabit.name,
         icon: existingHabit.icon,

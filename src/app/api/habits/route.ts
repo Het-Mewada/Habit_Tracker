@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@/lib/auth';
+import { getCurrentUser, ensureUserInDb } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { getTodayDateString, evaluateTaskOccurrence, DEFAULT_TIMEZONE } from '@/lib/date-utils';
 import { calculateHabitStreaks } from '@/lib/streaks';
@@ -13,16 +13,13 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const includeArchived = searchParams.get('includeArchived') === 'true';
 
-  const user = await db.user.findUnique({
-    where: { id: session.userId },
-    select: { timezone: true },
-  });
-  const userTimezone = user?.timezone || DEFAULT_TIMEZONE;
+  const user = await ensureUserInDb(session);
+  const userTimezone = user.timezone || DEFAULT_TIMEZONE;
   const todayStr = getTodayDateString(userTimezone);
 
   const habits = await db.habit.findMany({
     where: {
-      userId: session.userId,
+      userId: user.id,
       ...(includeArchived ? {} : { isArchived: false }),
     },
     orderBy: { createdAt: 'asc' },
@@ -31,7 +28,7 @@ export async function GET(req: Request) {
   // Fetch all logs for calculations
   const allLogs = await db.habitLog.findMany({
     where: {
-      userId: session.userId,
+      userId: user.id,
     },
   });
 
@@ -85,11 +82,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Habit name is required' }, { status: 400 });
     }
 
-    const user = await db.user.findUnique({
-      where: { id: session.userId },
-      select: { timezone: true },
-    });
-    const userTimezone = user?.timezone || DEFAULT_TIMEZONE;
+    const user = await ensureUserInDb(session);
+    const userTimezone = user.timezone || DEFAULT_TIMEZONE;
     const todayStr = getTodayDateString(userTimezone);
 
     const newHabit = await db.habit.create({

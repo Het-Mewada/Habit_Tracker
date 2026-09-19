@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
+import { db } from '@/lib/db';
 
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'habit_tracker_super_secret_jwt_key_2026_production'
@@ -50,6 +51,25 @@ export async function getCurrentUser(): Promise<JWTPayload | null> {
   } catch {
     return null;
   }
+}
+
+export async function ensureUserInDb(session: JWTPayload) {
+  let user = await db.user.findUnique({ where: { id: session.userId } });
+  if (!user) {
+    user = await db.user.findUnique({ where: { email: session.email.toLowerCase() } });
+    if (!user) {
+      user = await db.user.create({
+        data: {
+          id: session.userId,
+          email: session.email.toLowerCase(),
+          name: session.name || 'User',
+          passwordHash: '$2a$10$e8T1l2g9b0/examplehash',
+          timezone: 'UTC',
+        },
+      });
+    }
+  }
+  return user;
 }
 
 export const COOKIE_NAME = 'habit_session';
