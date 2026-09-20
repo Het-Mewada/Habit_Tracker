@@ -18,7 +18,7 @@ export default async function LandingPage() {
             <Activity className="w-5 h-5 stroke-[2.5]" />
           </div>
           <span className="text-lg font-extrabold tracking-tight text-white">
-            HabitPulse
+            HabitIQ
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -100,7 +100,7 @@ export default async function LandingPage() {
 
       {/* Footer */}
       <footer className="text-center py-4 text-xs font-mono text-slate-600 border-t border-slate-900">
-        HabitPulse Clinical Habit Engine © {new Date().getFullYear()}
+        HabitIQ Engine © {new Date().getFullYear()}
       </footer>
     </div>
   );

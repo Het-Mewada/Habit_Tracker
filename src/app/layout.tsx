@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'HabitPulse - Production Habit Tracker & AI Insights',
+  title: 'HabitIQ - AI-Powered Habit Tracker & Insights',
   description: 'Track daily habits, view historical completion trends, and unlock AI behavioral insights.',
 };
 

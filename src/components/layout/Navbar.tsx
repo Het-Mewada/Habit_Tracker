@@ -49,7 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({ userName = 'User', onToggleSideb
             <Activity className="w-4 h-4 stroke-[2.5]" />
           </div>
           <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">
-            HabitPulse
+            HabitIQ
           </span>
         </Link>
       </div>

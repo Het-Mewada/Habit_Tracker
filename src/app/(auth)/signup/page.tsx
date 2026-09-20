@@ -50,7 +50,7 @@ export default function SignupPage() {
             <Activity className="w-5 h-5 stroke-[2]" />
           </div>
           <h1 className="text-lg font-bold">Create Account</h1>
-          <p className="text-xs text-slate-400">Join HabitPulse clinical habit engine</p>
+          <p className="text-xs text-slate-400">Join HabitIQ habit engine</p>
         </div>
 
         {error && (

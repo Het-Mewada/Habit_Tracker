@@ -153,7 +153,7 @@ export default function SettingsPage() {
           </div>
 
           <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal">
-            HabitPulse uses a 3-tier strategy: <b>Groq API</b> is queried first, followed by <b>Google Gemini API</b> as backup, and an offline <b>Heuristic Engine</b> fallback.
+            HabitIQ uses a 3-tier strategy: <b>Groq API</b> is queried first, followed by <b>Google Gemini API</b> as backup, and an offline <b>Heuristic Engine</b> fallback.
           </p>
 
           <div className="space-y-3">
