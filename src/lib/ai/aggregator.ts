@@ -1,5 +1,5 @@
 import { db } from '../db';
-import { getPastDatesList, getDayOfWeekName, getTodayDateString, formatDateToYYYYMMDD } from '../date-utils';
+import { getPastDatesList, getDayOfWeekName, getTodayDateString, formatDateToYYYYMMDD, DEFAULT_TIMEZONE } from '../date-utils';
 import { calculateHabitStreaks } from '../streaks';
 
 export interface HabitSummaryItem {
@@ -18,24 +18,22 @@ export interface HabitSummaryItem {
 }
 
 export interface DayOfWeekPerformance {
-  day: string;
-  totalOpportunities: number;
-  totalCompleted: number;
+  dayName: string;
   rate: number;
+  totalOccurrences: number;
+  completedOccurrences: number;
 }
 
 export interface DailyCompletionRecord {
   date: string;
   completedCount: number;
-  totalActiveCount: number;
+  totalActive: number;
   rate: number;
 }
 
 export interface HabitAnalyticsSummary {
-  period: string; // e.g. "last_30_days"
-  generatedAt: string;
-  userTimezone: string;
-  totalActiveHabits: number;
+  periodDays: number;
+  activeHabitCount: number;
   overallCompletionRate: number;
   habits: HabitSummaryItem[];
   dailyCompletion: DailyCompletionRecord[];
@@ -48,7 +46,7 @@ export interface HabitAnalyticsSummary {
 
 export async function generateAnalyticsSummary(
   userId: string,
-  userTimezone: string = 'UTC',
+  userTimezone: string = DEFAULT_TIMEZONE,
   daysBack: number = 30
 ): Promise<HabitAnalyticsSummary> {
   const habits = await db.habit.findMany({

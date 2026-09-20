@@ -24,7 +24,7 @@ export async function POST(req: Request) {
         email: email.toLowerCase(),
         passwordHash,
         name,
-        timezone: timezone || 'UTC',
+        timezone: timezone || 'Asia/Kolkata',
       },
     });
 

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser, ensureUserInDb } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { getTodayDateString, getPastDatesList, getFormattedDateLabel, formatDateToYYYYMMDD } from '@/lib/date-utils';
+import { getTodayDateString, getPastDatesList, getFormattedDateLabel, formatDateToYYYYMMDD, DEFAULT_TIMEZONE } from '@/lib/date-utils';
 import { calculateHabitStreaks } from '@/lib/streaks';
 
 export async function GET(req: Request) {
@@ -15,7 +15,7 @@ export async function GET(req: Request) {
   const days = periodParam === '7' ? 7 : periodParam === '90' ? 90 : periodParam === 'all' ? 180 : 30;
 
   const user = await ensureUserInDb(session);
-  const userTimezone = user.timezone || 'UTC';
+  const userTimezone = user.timezone || DEFAULT_TIMEZONE;
   const todayStr = getTodayDateString(userTimezone);
 
   // 1. Fetch active habits

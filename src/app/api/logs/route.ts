@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser, ensureUserInDb } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { getTodayDateString, formatDateToYYYYMMDD } from '@/lib/date-utils';
+import { getTodayDateString, formatDateToYYYYMMDD, DEFAULT_TIMEZONE } from '@/lib/date-utils';
 
 export async function GET(req: Request) {
   const session = await getCurrentUser();
@@ -15,7 +15,7 @@ export async function GET(req: Request) {
   const endDate = searchParams.get('endDate');
 
   const user = await ensureUserInDb(session);
-  const userTimezone = user.timezone || 'UTC';
+  const userTimezone = user.timezone || DEFAULT_TIMEZONE;
   const todayStr = getTodayDateString(userTimezone);
 
   try {

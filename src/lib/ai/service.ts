@@ -1,6 +1,7 @@
 import { db } from '../db';
 import { generateAnalyticsSummary, HabitAnalyticsSummary } from './aggregator';
 import { generateHeuristicInsights, StructuredAiInsight } from './heuristic';
+import { DEFAULT_TIMEZONE } from '../date-utils';
 
 const SYSTEM_PROMPT = `
 You are an expert behavioral scientist and personal habit coach AI assistant.
@@ -229,7 +230,7 @@ export async function getUserDataDaysCount(userId: string): Promise<{ availableD
 
 export async function getOrGenerateAiInsights(
   userId: string,
-  userTimezone: string = 'UTC',
+  userTimezone: string = DEFAULT_TIMEZONE,
   forceRefresh: boolean = false
 ): Promise<{ insight: StructuredAiInsight; isCached: boolean }> {
   // 1. Check for cached insight if forceRefresh is false

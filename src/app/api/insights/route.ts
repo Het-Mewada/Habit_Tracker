@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth';
 import { getOrGenerateAiInsights } from '@/lib/ai/service';
 import { db } from '@/lib/db';
+import { DEFAULT_TIMEZONE } from '@/lib/date-utils';
 
 export async function GET() {
   const session = await getCurrentUser();
@@ -17,7 +18,7 @@ export async function GET() {
   try {
     const { insight, isCached } = await getOrGenerateAiInsights(
       session.userId,
-      user?.timezone || 'UTC',
+      user?.timezone || DEFAULT_TIMEZONE,
       false // do NOT force refresh on GET, return cached version!
     );
 
@@ -42,7 +43,7 @@ export async function POST() {
   try {
     const { insight, isCached } = await getOrGenerateAiInsights(
       session.userId,
-      user?.timezone || 'UTC',
+      user?.timezone || DEFAULT_TIMEZONE,
       true // FORCE REFRESH when user clicks refresh button or explicitly posts!
     );
 

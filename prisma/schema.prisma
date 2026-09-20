@@ -13,7 +13,7 @@ model User {
   email              String      @unique
   passwordHash       String
   name               String
-  timezone           String      @default("UTC")
+  timezone           String      @default("Asia/Kolkata")
   groqApiKey         String?
   geminiApiKey       String?
   requireMin7DaysAi  Boolean     @default(true)

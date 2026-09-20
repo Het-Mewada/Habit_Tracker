@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Lock, Mail, User, Globe, AlertCircle, Activity } from 'lucide-react';
+import { DEFAULT_TIMEZONE } from '@/lib/date-utils';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -11,7 +12,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [timezone, setTimezone] = useState(
-    typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'UTC'
+    typeof Intl !== 'undefined' ? (Intl.DateTimeFormat().resolvedOptions().timeZone || DEFAULT_TIMEZONE) : DEFAULT_TIMEZONE
   );
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);

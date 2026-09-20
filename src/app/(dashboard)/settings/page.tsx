@@ -23,7 +23,7 @@ export default function SettingsPage() {
         if (data.user) {
           setName(data.user.name || '');
           setEmail(data.user.email || '');
-          setTimezone(data.user.timezone || 'UTC');
+          setTimezone(data.user.timezone || 'Asia/Kolkata');
           setGroqApiKey(data.user.groqApiKey || '');
           setGeminiApiKey(data.user.geminiApiKey || '');
           setRequireMin7DaysAi(data.user.requireMin7DaysAi !== false);
@@ -134,7 +134,7 @@ export default function SettingsPage() {
                 type="text"
                 value={timezone}
                 onChange={(e) => setTimezone(e.target.value)}
-                placeholder="e.g. UTC, Asia/Kolkata, America/New_York"
+                placeholder="e.g. Asia/Kolkata, America/New_York, UTC"
                 className="w-full pl-9 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0E1013] text-slate-900 dark:text-slate-100 text-xs focus:outline-none focus:ring-1 focus:ring-slate-400 font-mono"
               />
             </div>

@@ -64,7 +64,7 @@ export async function ensureUserInDb(session: JWTPayload) {
           email: session.email.toLowerCase(),
           name: session.name || 'User',
           passwordHash: '$2a$10$e8T1l2g9b0/examplehash',
-          timezone: 'UTC',
+          timezone: 'Asia/Kolkata',
         },
       });
     }
